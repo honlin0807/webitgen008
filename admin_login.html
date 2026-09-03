@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body class="login-page">
+    <div class="login-box">
+        <h1>Admin Login</h1>
+        <div id="message"></div>
+        <form id="loginForm">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="e.g. admin" required>
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="e.g. 1234" required>
+            <input type="submit" value="Login">
+        </form>
+        <p style="font-size: 13px; color: #666; margin-top: 10px;">Default demo account: <strong>admin</strong> / <strong>1234</strong></p>
+        <p>No account? <a href="admin_register.html">Register here</a></p>
+        <p><a href="index.html">&larr; Back to website</a></p>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const messageEl = document.getElementById('message');
+
+            let registeredUsers = [];
+            try {
+                registeredUsers = JSON.parse(localStorage.getItem('admin_users')) || [];
+            } catch (err) {
+                registeredUsers = [];
+            }
+
+            // Check against default account or registered users
+            const isValidDefault = (username === 'admin' && password === '1234');
+            const foundUser = registeredUsers.find(u => u.username === username && u.password === password);
+
+            if (isValidDefault || foundUser) {
+                sessionStorage.setItem('admin_username', username);
+                window.location.href = 'admin_dashboard.html';
+            } else {
+                messageEl.innerHTML = '<p class="error">Wrong username or password.</p>';
+            }
+        });
+    </script>
+</body>
+</html>

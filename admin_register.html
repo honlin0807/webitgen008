@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Admin</title>
+    <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body class="login-page">
+    <div class="login-box">
+        <h1>Register Admin</h1>
+        <p>You can use a simple password such as 1234.</p>
+        <div id="message"></div>
+        <form id="registerForm">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required>
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+            <label for="confirm_password">Confirm Password</label>
+            <input type="password" id="confirm_password" name="confirm_password" required>
+            <input type="submit" value="Register">
+        </form>
+        <p>Already have an account? <a href="admin_login.html">Login here</a></p>
+        <p><a href="index.html">&larr; Back to website</a></p>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const messageEl = document.getElementById('message');
+
+            let registeredUsers = [];
+            try {
+                registeredUsers = JSON.parse(localStorage.getItem('admin_users')) || [];
+            } catch (err) {
+                registeredUsers = [];
+            }
+
+            if (username === 'admin' || registeredUsers.some(u => u.username === username)) {
+                messageEl.innerHTML = '<p class="error">Username already exists.</p>';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                messageEl.innerHTML = '<p class="error">Passwords do not match.</p>';
+                return;
+            }
+
+            registeredUsers.push({ username, email, password });
+            try {
+                localStorage.setItem('admin_users', JSON.stringify(registeredUsers));
+                messageEl.innerHTML = '<p class="success">Registration successful. Please <a href="admin_login.html">login</a>.</p>';
+                document.getElementById('registerForm').reset();
+            } catch (err) {
+                messageEl.innerHTML = '<p class="error">Registration failed to save to browser storage.</p>';
+            }
+        });
+    </script>
+</body>
+</html>
