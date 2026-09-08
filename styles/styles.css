@@ -140,9 +140,20 @@ input[type="submit"] {
 }
 
 .page-banner {
-    background: #eee;
+    background: url('../images/aboutus.png') no-repeat center center;
+    background-size: cover;
     text-align: center;
-    padding: 45px 8%;
+    padding: 80px 8%;
+    position: relative;
+}
+
+.page-banner .eyebrow,
+.page-banner h1,
+.page-banner p {
+    position: relative;
+    z-index: 1;
+    color: white;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .two-col {
@@ -158,9 +169,13 @@ input[type="submit"] {
 }
 
 .info-box {
-    background: #f4f4f4;
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     padding: 22px;
-    border: 1px solid #ddd;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(13, 38, 76, 0.10);
 }
 
 .enquiry-form {
