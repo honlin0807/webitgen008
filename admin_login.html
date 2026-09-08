@@ -22,13 +22,43 @@
         <p><a href="index.html">&larr; Back to website</a></p>
     </div>
 
+    <!-- Supabase JS SDK & Configuration -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            const submitBtn = this.querySelector('input[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.value = 'Checking...';
+            }
+
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
             const messageEl = document.getElementById('message');
 
+            // 1. Try Supabase cloud check
+            if (typeof isSupabaseConfigured === 'function' && isSupabaseConfigured()) {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('admin_users')
+                        .select('username')
+                        .eq('username', username)
+                        .eq('password', password)
+                        .maybeSingle();
+
+                    if (!error && data) {
+                        sessionStorage.setItem('admin_username', data.username);
+                        window.location.href = 'admin_dashboard.html';
+                        return;
+                    }
+                } catch (err) {
+                    console.error('Supabase login check failed:', err);
+                }
+            }
+
+            // 2. Fallback to localStorage / default account
             let registeredUsers = [];
             try {
                 registeredUsers = JSON.parse(localStorage.getItem('admin_users')) || [];
@@ -36,7 +66,6 @@
                 registeredUsers = [];
             }
 
-            // Check against default account or registered users
             const isValidDefault = (username === 'admin' && password === '1234');
             const foundUser = registeredUsers.find(u => u.username === username && u.password === password);
 
@@ -44,6 +73,10 @@
                 sessionStorage.setItem('admin_username', username);
                 window.location.href = 'admin_dashboard.html';
             } else {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.value = 'Login';
+                }
                 messageEl.innerHTML = '<p class="error">Wrong username or password.</p>';
             }
         });

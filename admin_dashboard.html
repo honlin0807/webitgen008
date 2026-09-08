@@ -66,6 +66,9 @@
         </form>
     </main>
 
+    <!-- Supabase JS SDK & Configuration -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
     <script src="js/main.js"></script>
     <script>
         // Check authentication
@@ -76,25 +79,44 @@
             document.getElementById('adminUsername').textContent = currentAdmin;
         }
 
-        // Load existing content into form fields
-        const currentData = getSiteData();
         const fields = [
             'announcement', 'introduction', 'about', 'mission', 'vision', 
             'values', 'ecommerce', 'programming', 'training', 'address', 
             'telephone', 'contact_about'
         ];
 
-        fields.forEach(field => {
-            const el = document.getElementById(field);
-            if (el && currentData[field] !== undefined) {
-                el.value = currentData[field];
-            }
-        });
+        // Populate fields
+        function populateFields(data) {
+            fields.forEach(field => {
+                const el = document.getElementById(field);
+                if (el && data[field] !== undefined) {
+                    el.value = data[field];
+                }
+            });
+        }
+
+        // 1. Instant load from local cache
+        populateFields(getSiteData());
+
+        // 2. Fetch latest from Supabase if connected
+        if (typeof fetchSiteDataFromSupabase === 'function') {
+            fetchSiteDataFromSupabase().then(cloudData => {
+                if (cloudData) {
+                    populateFields(cloudData);
+                }
+            });
+        }
 
         // Form submit handler
-        document.getElementById('editorForm').addEventListener('submit', function(e) {
+        document.getElementById('editorForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const updatedData = Object.assign({}, currentData);
+            const submitBtn = document.querySelector('input[type="submit"].save-button');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.value = 'Saving...';
+            }
+
+            const updatedData = Object.assign({}, getSiteData());
             fields.forEach(field => {
                 const el = document.getElementById(field);
                 if (el) {
@@ -102,9 +124,15 @@
                 }
             });
 
-            saveSiteData(updatedData);
+            const res = await saveSiteData(updatedData);
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.value = 'Save Changes';
+            }
+
             const statusMsg = document.getElementById('statusMessage');
-            statusMsg.innerHTML = '<p class="notice success">Website content updated successfully. <a href="index.html" target="_blank">View Website &rarr;</a></p>';
+            const syncText = (res && res.cloud) ? ' (Synced to Supabase Cloud ☁️)' : '';
+            statusMsg.innerHTML = '<p class="notice success">Website content updated successfully' + syncText + '. <a href="index.html" target="_blank">View Website &rarr;</a></p>';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
 

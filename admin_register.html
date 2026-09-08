@@ -26,15 +26,84 @@
         <p><a href="index.html">&larr; Back to website</a></p>
     </div>
 
+    <!-- Supabase JS SDK & Configuration -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
     <script>
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            const submitBtn = this.querySelector('input[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.value = 'Registering...';
+            }
+
             const username = document.getElementById('username').value.trim();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm_password').value;
             const messageEl = document.getElementById('message');
 
+            if (password !== confirmPassword) {
+                messageEl.innerHTML = '<p class="error">Passwords do not match.</p>';
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.value = 'Register';
+                }
+                return;
+            }
+
+            // 1. Check & Insert into Supabase if configured
+            if (typeof isSupabaseConfigured === 'function' && isSupabaseConfigured()) {
+                try {
+                    const { data: existingUser } = await supabaseClient
+                        .from('admin_users')
+                        .select('username')
+                        .eq('username', username)
+                        .maybeSingle();
+
+                    if (existingUser || username === 'admin') {
+                        messageEl.innerHTML = '<p class="error">Username already exists.</p>';
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.value = 'Register';
+                        }
+                        return;
+                    }
+
+                    const { error } = await supabaseClient
+                        .from('admin_users')
+                        .insert([{ username, email, password }]);
+
+                    if (error) {
+                        messageEl.innerHTML = '<p class="error">Registration error: ' + error.message + '</p>';
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.value = 'Register';
+                        }
+                        return;
+                    }
+
+                    // Also cache locally
+                    try {
+                        const localUsers = JSON.parse(localStorage.getItem('admin_users')) || [];
+                        localUsers.push({ username, email, password });
+                        localStorage.setItem('admin_users', JSON.stringify(localUsers));
+                    } catch (e) {}
+
+                    messageEl.innerHTML = '<p class="success">Registration successful (Saved to Supabase Cloud). Please <a href="admin_login.html">login</a>.</p>';
+                    document.getElementById('registerForm').reset();
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.value = 'Register';
+                    }
+                    return;
+                } catch (err) {
+                    console.error('Supabase registration error:', err);
+                }
+            }
+
+            // 2. Fallback to localStorage
             let registeredUsers = [];
             try {
                 registeredUsers = JSON.parse(localStorage.getItem('admin_users')) || [];
@@ -44,11 +113,10 @@
 
             if (username === 'admin' || registeredUsers.some(u => u.username === username)) {
                 messageEl.innerHTML = '<p class="error">Username already exists.</p>';
-                return;
-            }
-
-            if (password !== confirmPassword) {
-                messageEl.innerHTML = '<p class="error">Passwords do not match.</p>';
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.value = 'Register';
+                }
                 return;
             }
 
@@ -59,6 +127,11 @@
                 document.getElementById('registerForm').reset();
             } catch (err) {
                 messageEl.innerHTML = '<p class="error">Registration failed to save to browser storage.</p>';
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.value = 'Register';
             }
         });
     </script>

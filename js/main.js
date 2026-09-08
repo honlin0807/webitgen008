@@ -1,4 +1,4 @@
-// Default website content (matching MySQL database initial records)
+// Default website content (matching MySQL & Supabase database initial records)
 const DEFAULT_SITE_DATA = {
     company_name: 'NEIVCE Trading PLT',
     announcement: 'Welcome to NEIVCE Trading PLT.',
@@ -15,7 +15,7 @@ const DEFAULT_SITE_DATA = {
     contact_about: 'NEIVCE Trading PLT provides e-commerce, computer programming services and computer training.'
 };
 
-// Retrieve content from localStorage or fallback to defaults
+// Retrieve content from localStorage (instant rendering cache) or fallback to defaults
 function getSiteData() {
     try {
         const saved = localStorage.getItem('site_content');
@@ -28,20 +28,77 @@ function getSiteData() {
     return Object.assign({}, DEFAULT_SITE_DATA);
 }
 
-// Save content to localStorage
-function saveSiteData(data) {
+// Fetch real-time content from Supabase cloud database and update cache
+async function fetchSiteDataFromSupabase() {
+    if (typeof isSupabaseConfigured === 'function' && isSupabaseConfigured()) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('site_content')
+                .select('content_key, content_value');
+
+            if (error) {
+                console.warn('Could not fetch from Supabase site_content:', error.message);
+                return null;
+            }
+
+            if (data && data.length > 0) {
+                const cloudData = {};
+                data.forEach(row => {
+                    cloudData[row.content_key] = row.content_value;
+                });
+
+                const mergedData = Object.assign({}, DEFAULT_SITE_DATA, cloudData);
+                localStorage.setItem('site_content', JSON.stringify(mergedData));
+                applySiteData(mergedData);
+                return mergedData;
+            }
+        } catch (err) {
+            console.error('Error fetching site_content from Supabase:', err);
+        }
+    }
+    return null;
+}
+
+// Save content: writes to Supabase cloud database and updates local cache
+async function saveSiteData(data) {
+    // 1. Update local cache immediately
     try {
         localStorage.setItem('site_content', JSON.stringify(data));
-        return true;
     } catch (e) {
-        console.error('Failed to save site_content to localStorage:', e);
-        return false;
+        console.error('Failed to save to localStorage cache:', e);
     }
+
+    // 2. If Supabase is connected, sync to cloud database
+    if (typeof isSupabaseConfigured === 'function' && isSupabaseConfigured()) {
+        try {
+            const rows = Object.keys(data).map(key => ({
+                content_key: key,
+                content_value: String(data[key] || ''),
+                updated_at: new Date().toISOString()
+            }));
+
+            const { error } = await supabaseClient
+                .from('site_content')
+                .upsert(rows, { onConflict: 'content_key' });
+
+            if (error) {
+                console.error('Supabase upsert error:', error);
+                return { success: false, error: error.message, cloud: false };
+            }
+
+            return { success: true, cloud: true };
+        } catch (err) {
+            console.error('Failed to save to Supabase:', err);
+            return { success: false, error: err.message, cloud: false };
+        }
+    }
+
+    return { success: true, cloud: false };
 }
 
 // Apply content dynamically to HTML elements with data-content attribute
-function applySiteData() {
-    const data = getSiteData();
+function applySiteData(customData) {
+    const data = customData || getSiteData();
     document.querySelectorAll('[data-content]').forEach(el => {
         const key = el.getAttribute('data-content');
         if (data[key] !== undefined) {
@@ -54,9 +111,18 @@ function applySiteData() {
     });
 }
 
-// Auto-run applySiteData when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', applySiteData);
-} else {
+// Initialize page content
+function initPageContent() {
+    // Immediate render with cached data for instant display (no layout jump)
     applySiteData();
+
+    // Async sync with Supabase cloud database
+    fetchSiteDataFromSupabase();
+}
+
+// Auto-run when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPageContent);
+} else {
+    initPageContent();
 }
