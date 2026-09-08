@@ -36,22 +36,35 @@ nav a {
 }
 
 .hero {
-    background: #e8f1fb;
-    padding: 60px 8%;
+    position: relative;
+    background: url('../images/home.png') no-repeat center center;
+    background-size: cover;
+    padding: 70px 8%;
     display: flex;
-    gap: 30px;
+    gap: 32px;
     align-items: center;
 }
 
 .hero-copy {
-    flex: 2;
+    flex: 1.6;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 36px 40px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 8px 32px rgba(13, 38, 76, 0.12);
 }
 
 .hero-card {
     flex: 1;
-    background: white;
-    border: 1px solid #ccc;
-    padding: 20px;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 8px 32px rgba(13, 38, 76, 0.12);
 }
 
 h1 {

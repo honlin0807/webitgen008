@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register Admin</title>
     <link rel="stylesheet" href="styles/styles.css">
 </head>
+
 <body class="login-page">
     <div class="login-box">
         <h1>Register Admin</h1>
@@ -30,7 +32,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-config.js"></script>
     <script>
-        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        document.getElementById('registerForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             const submitBtn = this.querySelector('input[type="submit"]');
             if (submitBtn) {
@@ -89,7 +91,7 @@
                         const localUsers = JSON.parse(localStorage.getItem('admin_users')) || [];
                         localUsers.push({ username, email, password });
                         localStorage.setItem('admin_users', JSON.stringify(localUsers));
-                    } catch (e) {}
+                    } catch (e) { }
 
                     messageEl.innerHTML = '<p class="success">Registration successful (Saved to Supabase Cloud). Please <a href="admin_login.html">login</a>.</p>';
                     document.getElementById('registerForm').reset();
@@ -136,4 +138,5 @@
         });
     </script>
 </body>
+
 </html>
