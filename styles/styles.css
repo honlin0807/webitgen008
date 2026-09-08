@@ -140,11 +140,21 @@ input[type="submit"] {
 }
 
 .page-banner {
-    background: url('../images/aboutus.png') no-repeat center center;
-    background-size: cover;
+    background: #eee;
     text-align: center;
     padding: 80px 8%;
     position: relative;
+    background-size: cover;
+}
+
+.about-banner {
+    background: url('../images/aboutus.png') no-repeat center center;
+    background-size: cover;
+}
+
+.contact-banner {
+    background: url('../images/Contactus.png') no-repeat center center;
+    background-size: cover;
 }
 
 .page-banner .eyebrow,
@@ -179,9 +189,13 @@ input[type="submit"] {
 }
 
 .enquiry-form {
-    background: #f4f4f4;
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     padding: 22px;
-    border: 1px solid #ddd;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(13, 38, 76, 0.10);
 }
 
 .values {
