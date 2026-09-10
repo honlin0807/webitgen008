@@ -153,7 +153,12 @@ input[type="submit"] {
 }
 
 .contact-banner {
-    background: url('../images/Contactus.png') no-repeat center center;
+    background: url('../images/contactus.png') no-repeat center center;
+    background-size: cover;
+}
+
+.services-banner {
+    background: url('../images/Service.png') no-repeat center center;
     background-size: cover;
 }
 
@@ -161,7 +166,7 @@ input[type="submit"] {
 .page-banner h1,
 .page-banner p {
     position: relative;
-    z-index: 1;
+    z-index: 5;
     color: white;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
