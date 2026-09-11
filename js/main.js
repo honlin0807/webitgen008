@@ -14,8 +14,6 @@ const DEFAULT_SITE_DATA = {
     telephone: '03-8737 8770',
     contact_about: 'NEIVCE Trading PLT provides e-commerce, computer programming services and computer training.'
 };
-
-// Retrieve content from localStorage (instant rendering cache) or fallback to defaults
 function getSiteData() {
     try {
         const saved = localStorage.getItem('site_content');
@@ -28,7 +26,6 @@ function getSiteData() {
     return Object.assign({}, DEFAULT_SITE_DATA);
 }
 
-// Fetch real-time content from Supabase cloud database and update cache
 async function fetchSiteDataFromSupabase() {
     if (typeof isSupabaseConfigured === 'function' && isSupabaseConfigured()) {
         try {
@@ -59,16 +56,13 @@ async function fetchSiteDataFromSupabase() {
     return null;
 }
 
-// Save content: writes to Supabase cloud database and updates local cache
 async function saveSiteData(data) {
-    // 1. Update local cache immediately
     try {
         localStorage.setItem('site_content', JSON.stringify(data));
     } catch (e) {
         console.error('Failed to save to localStorage cache:', e);
     }
 
-    // 2. If Supabase is connected, sync to cloud database
     if (typeof isSupabaseConfigured === 'function' && isSupabaseConfigured()) {
         try {
             const rows = Object.keys(data).map(key => ({
@@ -96,7 +90,6 @@ async function saveSiteData(data) {
     return { success: true, cloud: false };
 }
 
-// Apply content dynamically to HTML elements with data-content attribute
 function applySiteData(customData) {
     const data = customData || getSiteData();
     document.querySelectorAll('[data-content]').forEach(el => {
@@ -111,16 +104,13 @@ function applySiteData(customData) {
     });
 }
 
-// Initialize page content
 function initPageContent() {
-    // Immediate render with cached data for instant display (no layout jump)
+
     applySiteData();
 
-    // Async sync with Supabase cloud database
     fetchSiteDataFromSupabase();
 }
 
-// Auto-run when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initPageContent);
 } else {

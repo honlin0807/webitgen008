@@ -22,7 +22,7 @@
         <p><a href="index.html">&larr; Back to website</a></p>
     </div>
 
-    <!-- Supabase JS SDK & Configuration -->
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-config.js"></script>
     <script>
@@ -38,7 +38,6 @@
             const password = document.getElementById('password').value.trim();
             const messageEl = document.getElementById('message');
 
-            // 1. Try Supabase cloud check
             if (typeof isSupabaseConfigured === 'function' && isSupabaseConfigured()) {
                 try {
                     const { data, error } = await supabaseClient
@@ -58,7 +57,7 @@
                 }
             }
 
-            // 2. Fallback to localStorage / default account
+
             let registeredUsers = [];
             try {
                 registeredUsers = JSON.parse(localStorage.getItem('admin_users')) || [];

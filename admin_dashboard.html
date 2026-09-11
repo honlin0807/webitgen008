@@ -66,12 +66,11 @@
         </form>
     </main>
 
-    <!-- Supabase JS SDK & Configuration -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-config.js"></script>
     <script src="js/main.js"></script>
     <script>
-        // Check authentication
+
         const currentAdmin = sessionStorage.getItem('admin_username');
         if (!currentAdmin) {
             window.location.href = 'admin_login.html';
@@ -85,7 +84,7 @@
             'telephone', 'contact_about'
         ];
 
-        // Populate fields
+
         function populateFields(data) {
             fields.forEach(field => {
                 const el = document.getElementById(field);
@@ -95,10 +94,10 @@
             });
         }
 
-        // 1. Instant load from local cache
+
         populateFields(getSiteData());
 
-        // 2. Fetch latest from Supabase if connected
+
         if (typeof fetchSiteDataFromSupabase === 'function') {
             fetchSiteDataFromSupabase().then(cloudData => {
                 if (cloudData) {
@@ -107,7 +106,6 @@
             });
         }
 
-        // Form submit handler
         document.getElementById('editorForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const submitBtn = document.querySelector('input[type="submit"].save-button');
@@ -136,7 +134,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
 
-        // Logout handler
         document.getElementById('logoutBtn').addEventListener('click', function(e) {
             e.preventDefault();
             sessionStorage.removeItem('admin_username');
